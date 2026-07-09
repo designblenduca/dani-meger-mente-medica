@@ -21,24 +21,100 @@
     a:hover { color: var(--text-accent-soft); }
     input, select, textarea { font-family: var(--font-sans); }
     ::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+    /* ---- Scroll reveal (entrance-only, IntersectionObserver-driven) ---- */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1);
+      will-change: opacity, transform;
+    }
+    [data-reveal].is-in { opacity: 1; transform: none; }
+
+    /* ---- Sticky header: shadow after scroll ---- */
+    header { transition: box-shadow .4s ease; }
+    header.is-scrolled { box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+
+    /* ---- Gold buttons: shine sweep on hover ---- */
+    .btn-shine { position: relative; overflow: hidden; }
+    .btn-shine::before {
+      content: "";
+      position: absolute; top: 0; left: -60%;
+      width: 40%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+      transform: skewX(-20deg);
+      transition: left .7s cubic-bezier(.16,1,.3,1);
+      pointer-events: none;
+    }
+    .btn-shine:hover::before { left: 130%; }
+
+    /* ---- Portrait photo zoom on hover ---- */
+    .photo-zoom { overflow: hidden; }
+    .photo-zoom image-slot { transition: transform .8s cubic-bezier(.16,1,.3,1); display: block; }
+    .photo-zoom:hover image-slot { transform: scale(1.05); }
+
+    /* ---- Card icon lift on hover (paired with existing style-hover cards) ---- */
+    .icon-box { transition: transform .4s cubic-bezier(.34,1.56,.64,1), background-color .3s ease, border-color .3s ease; }
+    .hover-card:hover .icon-box { transform: translateY(-4px) scale(1.08); }
+
+    /* ---- Floating gold particles (hero only, decorative) ---- */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,201,109,0.85), rgba(232,201,109,0));
+      pointer-events: none;
+      opacity: 0;
+      animation: particle-float 10s ease-in-out infinite;
+    }
+    @keyframes particle-float {
+      0%   { transform: translateY(0) translateX(0); opacity: 0; }
+      12%  { opacity: .6; }
+      50%  { transform: translateY(-150px) translateX(16px); }
+      88%  { opacity: 0; }
+      100% { transform: translateY(-230px) translateX(-12px); opacity: 0; }
+    }
+
+    /* ---- Success state: pop-in checkmark + fade-up copy ---- */
+    .pop-in { animation: pop-in .55s cubic-bezier(.34,1.56,.64,1) both; }
+    @keyframes pop-in {
+      0%   { transform: scale(0.4); opacity: 0; }
+      70%  { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .fade-up-in { animation: fade-up-in .6s cubic-bezier(.16,1,.3,1) .15s both; }
+    @keyframes fade-up-in {
+      from { transform: translateY(14px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+      .particle { animation: none !important; opacity: 0 !important; }
+      .photo-zoom:hover image-slot { transform: none; }
+    }
   </style>
 </helmet>
 <div data-mmm data-theme="{{ theme }}" style="--duration-reveal:.8s;background:var(--bg-page);color:var(--text-primary);min-height:100vh;overflow-x:hidden;font-family:var(--font-sans)">
 
   <!-- ============ HEADER ============ -->
-  <header style="position:sticky;top:0;z-index:60;background:var(--bg-page);border-bottom:1px solid var(--border-subtle)">
+  <header data-site-header style="position:sticky;top:0;z-index:60;background:var(--bg-page);border-bottom:1px solid var(--border-subtle)">
     <div style="max-width:1180px;margin:0 auto;padding:15px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px">
       <div style="display:flex;flex-direction:column;line-height:1.1">
         <span style="font-size:1.1rem;font-weight:800;letter-spacing:-0.02em">Dani Meger</span>
         <span style="font-size:0.58rem;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-accent);margin-top:3px">Private Wealth · Mentoria Médica</span>
       </div>
-      <a href="#aplicacao" style="display:inline-flex;align-items:center;padding:12px 22px;border-radius:var(--radius-lg);background:var(--gradient-gold);color:var(--text-on-gold);font-weight:700;font-size:0.8rem;letter-spacing:0.02em;box-shadow:var(--shadow-gold-btn);transition:transform .3s, box-shadow .3s" style-hover="transform:translateY(-2px);box-shadow:var(--shadow-gold-btn-hover)">Aplicar agora</a>
+      <a href="#aplicacao" class="btn-shine" style="display:inline-flex;align-items:center;padding:12px 22px;border-radius:var(--radius-lg);background:var(--gradient-gold);color:var(--text-on-gold);font-weight:700;font-size:0.8rem;letter-spacing:0.02em;box-shadow:var(--shadow-gold-btn);transition:transform .3s, box-shadow .3s" style-hover="transform:translateY(-2px);box-shadow:var(--shadow-gold-btn-hover)">Aplicar agora</a>
     </div>
   </header>
 
   <!-- ============ HERO ============ -->
   <section style="position:relative;overflow:hidden">
     <div style="position:absolute;top:-160px;left:-140px;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle, rgba(232,201,109,0.10), transparent 68%);pointer-events:none"></div>
+    <div class="particle" style="left:8%;top:78%;width:6px;height:6px;animation-delay:0s"></div>
+    <div class="particle" style="left:18%;top:64%;width:4px;height:4px;animation-delay:2.4s"></div>
+    <div class="particle" style="left:32%;top:82%;width:8px;height:8px;animation-delay:4.8s"></div>
+    <div class="particle" style="left:72%;top:70%;width:5px;height:5px;animation-delay:1.2s"></div>
+    <div class="particle" style="left:86%;top:86%;width:7px;height:7px;animation-delay:6s"></div>
     <div style="max-width:1180px;margin:0 auto;padding:clamp(56px,8vw,104px) 32px clamp(64px,9vw,110px);position:relative">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(40px,6vw,72px);align-items:center">
 
@@ -49,7 +125,7 @@
           <p style="font-size:var(--text-lg);font-style:italic;color:var(--text-accent-soft);line-height:1.4;margin:0 0 26px;max-width:34ch">"Não é sobre apenas ganhar mais. É sobre parar de perder dinheiro sem perceber."</p>
           <p style="font-size:var(--text-md);line-height:1.75;color:var(--text-dim);margin:0 0 34px;max-width:52ch">Doutor(a), você provavelmente vive um paradoxo silencioso que atinge os profissionais mais brilhantes da medicina: o do <strong style="color:var(--text-primary);font-weight:600">médico rico em faturamento e pobre em gestão</strong>. Anos dominando a técnica, operando com maestria e lotando a agenda, sem que ninguém tenha te mostrado como transformar isso em patrimônio.</p>
           <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">
-            <a href="#aplicacao" style="display:inline-flex;align-items:center;justify-content:center;padding:20px 40px;border-radius:var(--radius-xl);background:var(--gradient-gold);color:var(--text-on-gold);font-weight:700;font-size:0.92rem;letter-spacing:0.04em;text-transform:uppercase;box-shadow:var(--shadow-gold-btn);transition:transform .3s, box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-gold-btn-hover)">Completar minha aplicação para a mentoria</a>
+            <a href="#aplicacao" class="btn-shine" style="display:inline-flex;align-items:center;justify-content:center;padding:20px 40px;border-radius:var(--radius-xl);background:var(--gradient-gold);color:var(--text-on-gold);font-weight:700;font-size:0.92rem;letter-spacing:0.04em;text-transform:uppercase;box-shadow:var(--shadow-gold-btn);transition:transform .3s, box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-gold-btn-hover)">Completar minha aplicação para a mentoria</a>
             <span style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted)">Processo seletivo · Vagas limitadas por turma · Análise de perfil</span>
           </div>
         </div>
@@ -57,7 +133,7 @@
         <!-- right: portrait -->
         <div data-reveal data-reveal-delay="140" style="position:relative;width:100%;max-width:460px;justify-self:center">
           <div style="position:absolute;inset:-30px -30px auto auto;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle, rgba(232,201,109,0.16), transparent 70%);filter:blur(40px);pointer-events:none"></div>
-          <div style="position:relative;width:100%;aspect-ratio:4/5;border-radius:var(--radius-3xl);overflow:hidden;border:1px solid var(--border-subtle);box-shadow:0 40px 90px rgba(0,0,0,0.55)">
+          <div class="photo-zoom" style="position:relative;width:100%;aspect-ratio:4/5;border-radius:var(--radius-3xl);overflow:hidden;border:1px solid var(--border-subtle);box-shadow:0 40px 90px rgba(0,0,0,0.55)">
             <image-slot id="hero-portrait" shape="rounded" radius="20" fit="cover" placeholder="Retrato executivo — médico(a) em ambiente premium" src="./images/img-hero.png" style="width:100%;height:100%"></image-slot>
             <div style="position:absolute;inset:0;background:linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.55));pointer-events:none"></div>
             <div style="position:absolute;left:20px;bottom:20px;right:20px;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--radius-lg);background:var(--bg-page);border:1px solid var(--border-subtle)">
@@ -78,7 +154,7 @@
   <section style="background:var(--bg-alt);border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)">
     <div style="max-width:1180px;margin:0 auto;padding:clamp(60px,8vw,96px) 32px">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(36px,5vw,56px);align-items:center">
-        <blockquote data-reveal style="margin:0;font-size:clamp(1.55rem,3vw,2.15rem);font-weight:700;letter-spacing:-0.02em;line-height:1.22">Faturamento é ego. <span class="gold-text">Lucro é saúde financeira.</span></blockquote>
+        <blockquote data-reveal style="margin:0;font-size:clamp(1.55rem,3vw,2.15rem);font-weight:700;letter-spacing:-0.02em;line-height:1.22">Faturamento é ego.<br><span class="gold-text">Lucro é saúde financeira.</span></blockquote>
         <div data-reveal data-reveal-delay="120" style="display:flex;flex-direction:column;gap:18px">
           <p style="margin:0;font-size:var(--text-md);line-height:1.75;color:var(--text-dim)">Trabalhar mais horas ou dar mais plantões não é o caminho para a sua liberdade. O verdadeiro caminho está em <strong style="color:var(--text-primary);font-weight:600">estancar as sangrias invisíveis</strong> e estruturar o seu patrimônio de forma consciente.</p>
           <p style="margin:0;font-size:var(--text-body);line-height:1.75;color:var(--text-muted)">A verdade que ninguém te contou na faculdade ou nos hospitais: você dominou a técnica, mas nunca te ensinaram a gerir o ativo mais valioso que construiu: a sua própria estrutura financeira, patrimonial e empresarial.</p>
@@ -97,26 +173,26 @@
 
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:20px">
 
-        <div data-reveal data-reveal-delay="0" style="position:relative;padding:30px 28px 32px;border:1px solid var(--border-subtle);border-radius:var(--radius-2xl);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
-          <div style="width:52px;height:52px;border-radius:14px;background:var(--surface-hover);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;color:var(--text-accent);margin-bottom:22px">{{ icons.trendingDown }}</div>
+        <div data-reveal data-reveal-delay="0" class="hover-card" style="position:relative;padding:30px 28px 32px;border:1px solid var(--border-subtle);border-radius:var(--radius-2xl);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
+          <div class="icon-box" style="width:52px;height:52px;border-radius:14px;background:var(--surface-hover);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;color:var(--text-accent);margin-bottom:22px">{{ icons.trendingDown }}</div>
           <h3 style="font-size:1.12rem;font-weight:700;letter-spacing:-0.01em;line-height:1.25;margin:0 0 12px">A falsa prosperidade médica</h3>
           <p style="font-size:var(--text-sm);line-height:1.7;color:var(--text-dim);margin:0">Consultórios que faturam R$ 200k/mês, mas terminam o período no vermelho por puro amadorismo operacional e confusão crônica entre Pessoa Física e Pessoa Jurídica.</p>
         </div>
 
-        <div data-reveal data-reveal-delay="90" style="position:relative;padding:30px 28px 32px;border:1px solid var(--border-subtle);border-radius:var(--radius-2xl);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
-          <div style="width:52px;height:52px;border-radius:14px;background:var(--surface-hover);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;color:var(--text-accent);margin-bottom:22px">{{ icons.droplet }}</div>
+        <div data-reveal data-reveal-delay="90" class="hover-card" style="position:relative;padding:30px 28px 32px;border:1px solid var(--border-subtle);border-radius:var(--radius-2xl);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
+          <div class="icon-box" style="width:52px;height:52px;border-radius:14px;background:var(--surface-hover);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;color:var(--text-accent);margin-bottom:22px">{{ icons.droplet }}</div>
           <h3 style="font-size:1.12rem;font-weight:700;letter-spacing:-0.01em;line-height:1.25;margin:0 0 12px">A sangria invisível</h3>
           <p style="font-size:var(--text-sm);line-height:1.7;color:var(--text-dim);margin:0">A ilusão de que a riqueza vem de uma "cesta de investimentos". Você perde mais com bitributação incorreta, glosas de planos e seguros ineficientes do que qualquer aplicação convencional consegue render.</p>
         </div>
 
-        <div data-reveal data-reveal-delay="180" style="position:relative;padding:30px 28px 32px;border:1px solid var(--border-subtle);border-radius:var(--radius-2xl);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
-          <div style="width:52px;height:52px;border-radius:14px;background:var(--surface-hover);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;color:var(--text-accent);margin-bottom:22px">{{ icons.briefcase }}</div>
+        <div data-reveal data-reveal-delay="180" class="hover-card" style="position:relative;padding:30px 28px 32px;border:1px solid var(--border-subtle);border-radius:var(--radius-2xl);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
+          <div class="icon-box" style="width:52px;height:52px;border-radius:14px;background:var(--surface-hover);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;color:var(--text-accent);margin-bottom:22px">{{ icons.briefcase }}</div>
           <h3 style="font-size:1.12rem;font-weight:700;letter-spacing:-0.01em;line-height:1.25;margin:0 0 12px">O emprego auto-outorgado</h3>
           <p style="font-size:var(--text-sm);line-height:1.7;color:var(--text-dim);margin:0">Se o consultório depende 100% da sua presença física e do seu jaleco para gerar receita, você não construiu um ativo. Criou um emprego de luxo altamente exaustivo.</p>
         </div>
 
-        <div data-reveal data-reveal-delay="270" style="position:relative;padding:30px 28px 32px;border:1px solid var(--border-subtle);border-radius:var(--radius-2xl);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
-          <div style="width:52px;height:52px;border-radius:14px;background:var(--surface-hover);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;color:var(--text-accent);margin-bottom:22px">{{ icons.shieldAlert }}</div>
+        <div data-reveal data-reveal-delay="270" class="hover-card" style="position:relative;padding:30px 28px 32px;border:1px solid var(--border-subtle);border-radius:var(--radius-2xl);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
+          <div class="icon-box" style="width:52px;height:52px;border-radius:14px;background:var(--surface-hover);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;color:var(--text-accent);margin-bottom:22px">{{ icons.shieldAlert }}</div>
           <h3 style="font-size:1.12rem;font-weight:700;letter-spacing:-0.01em;line-height:1.25;margin:0 0 12px">A vulnerabilidade patrimonial</h3>
           <p style="font-size:var(--text-sm);line-height:1.7;color:var(--text-dim);margin:0">A total falta de blindagem e planejamento sucessório. Sem proteção, qualquer intercorrência médica ou burnout paralisa instantaneamente a sua única fonte de renda.</p>
         </div>
@@ -139,15 +215,15 @@
           <p style="font-size:var(--text-body);line-height:1.78;color:var(--text-muted);margin:0 0 34px">Hoje, ela usa as regras ocultas do sistema a favor do seu patrimônio médico.</p>
 
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px">
-            <div style="padding:20px 18px;border:1px solid var(--border-subtle);border-radius:var(--radius-lg);background:var(--surface-subtle)">
+            <div style="padding:20px 18px;border:1px solid var(--border-subtle);border-radius:var(--radius-lg);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
               <div style="font-size:var(--text-stat);font-weight:800;letter-spacing:-0.03em;color:var(--text-accent);line-height:1">24</div>
               <div style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-top:8px">Anos de Private Banking</div>
             </div>
-            <div style="padding:20px 18px;border:1px solid var(--border-subtle);border-radius:var(--radius-lg);background:var(--surface-subtle)">
-              <div style="font-size:var(--text-stat);font-weight:800;letter-spacing:-0.03em;color:var(--text-accent);line-height:1">Bilionários</div>
+            <div style="padding:20px 18px;border:1px solid var(--border-subtle);border-radius:var(--radius-lg);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
+              <div style="font-size:clamp(1.35rem,4vw,1.7rem);font-weight:800;letter-spacing:-0.02em;color:var(--text-accent);line-height:1;white-space:nowrap">Bilionários</div>
               <div style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-top:8px">Em ativos sob gestão</div>
             </div>
-            <div style="padding:20px 18px;border:1px solid var(--border-subtle);border-radius:var(--radius-lg);background:var(--surface-subtle)">
+            <div style="padding:20px 18px;border:1px solid var(--border-subtle);border-radius:var(--radius-lg);background:var(--surface-subtle);transition:background .3s, border-color .3s, transform .3s" style-hover="background:var(--surface-hover);border-color:var(--border-hover);transform:translateY(-4px)">
               <div style="font-size:var(--text-stat);font-weight:800;letter-spacing:-0.03em;color:var(--text-accent);line-height:1">CEO</div>
               <div style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-top:8px">Fundadora da Fidem</div>
             </div>
@@ -156,7 +232,7 @@
 
         <!-- right: portrait + glass credential -->
         <div data-reveal data-reveal-delay="140" style="position:relative;width:100%;max-width:440px;justify-self:center">
-          <div style="position:relative;width:100%;aspect-ratio:4/5;border-radius:var(--radius-3xl);overflow:hidden;border:1px solid var(--border-subtle);box-shadow:0 40px 90px rgba(0,0,0,0.5)">
+          <div class="photo-zoom" style="position:relative;width:100%;aspect-ratio:4/5;border-radius:var(--radius-3xl);overflow:hidden;border:1px solid var(--border-subtle);box-shadow:0 40px 90px rgba(0,0,0,0.5)">
             <image-slot id="dani-portrait" shape="rounded" radius="20" fit="cover" placeholder="Retrato de Daniele Meger — ambiente executivo" src="./images/img-dani.png" style="width:100%;height:100%"></image-slot>
           </div>
           <div style="position:absolute;left:-14px;bottom:26px;max-width:250px;padding:18px 20px;border-radius:var(--radius-xl);background:linear-gradient(135deg, rgba(232,201,109,0.16), rgba(232,201,109,0.04));backdrop-filter:blur(18px);border:1px solid var(--border-subtle);box-shadow:0 20px 50px rgba(0,0,0,0.45)">
@@ -198,7 +274,7 @@
         <!-- step 2 (number highlight) -->
         <div data-reveal data-reveal-delay="80" style="position:relative;display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,3vw,36px);padding:0 0 clamp(28px,3vw,40px)">
           <div style="display:flex;flex-direction:column;align-items:center">
-            <div style="width:56px;height:56px;flex:none;border-radius:16px;border:1px solid var(--border-hover);background:var(--surface-hover);display:flex;align-items:baseline;justify-content:center;color:var(--text-accent);gap:1px"><span style="font-size:1.5rem;font-weight:800;letter-spacing:-0.03em;line-height:1">2</span><span style="font-size:0.7rem;font-weight:700">×</span></div>
+            <div style="width:56px;height:56px;flex:none;border-radius:16px;border:1px solid var(--border-hover);background:var(--surface-hover);display:flex;align-items:center;justify-content:center;color:var(--text-accent)">{{ icons.userCircle }}</div>
             <div style="flex:1;width:1px;background:linear-gradient(var(--border-hover), var(--border-subtle));margin-top:8px"></div>
           </div>
           <div style="padding-top:4px">
@@ -213,7 +289,7 @@
         <!-- step 3 (number highlight) -->
         <div data-reveal data-reveal-delay="160" style="position:relative;display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,3vw,36px);padding:0 0 clamp(28px,3vw,40px)">
           <div style="display:flex;flex-direction:column;align-items:center">
-            <div style="width:56px;height:56px;flex:none;border-radius:16px;border:1px solid var(--border-hover);background:var(--surface-hover);display:flex;align-items:baseline;justify-content:center;color:var(--text-accent);gap:1px"><span style="font-size:1.5rem;font-weight:800;letter-spacing:-0.03em;line-height:1">4</span><span style="font-size:0.7rem;font-weight:700">×</span></div>
+            <div style="width:56px;height:56px;flex:none;border-radius:16px;border:1px solid var(--border-hover);background:var(--surface-hover);display:flex;align-items:center;justify-content:center;color:var(--text-accent)">{{ icons.users }}</div>
             <div style="flex:1;width:1px;background:linear-gradient(var(--border-hover), var(--border-subtle));margin-top:8px"></div>
           </div>
           <div style="padding-top:4px">
@@ -268,7 +344,7 @@
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;align-items:stretch">
 
         <!-- SIM -->
-        <div data-reveal style="position:relative;padding:38px 34px;border-radius:var(--radius-3xl);border:1px solid var(--border-hover);background:linear-gradient(155deg, rgba(232,201,109,0.12), rgba(232,201,109,0.03));box-shadow:0 30px 70px rgba(0,0,0,0.35)">
+        <div data-reveal style="position:relative;padding:38px 34px;border-radius:var(--radius-3xl);border:1px solid var(--border-hover);background:linear-gradient(155deg, rgba(232,201,109,0.12), rgba(232,201,109,0.03));box-shadow:0 30px 70px rgba(0,0,0,0.35);transition:transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease" style-hover="transform:translateY(-6px);box-shadow:0 40px 90px rgba(0,0,0,0.45)">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
             <div style="width:44px;height:44px;border-radius:12px;background:var(--gradient-gold);color:var(--text-on-gold);display:flex;align-items:center;justify-content:center">{{ icons.check }}</div>
             <h3 style="font-size:1.3rem;font-weight:800;letter-spacing:-0.01em;margin:0">Sim, se você…</h3>
@@ -281,7 +357,7 @@
         </div>
 
         <!-- NÃO -->
-        <div data-reveal data-reveal-delay="120" style="position:relative;padding:38px 34px;border-radius:var(--radius-3xl);border:1px solid var(--border-subtle);background:var(--surface-subtle)">
+        <div data-reveal data-reveal-delay="120" style="position:relative;padding:38px 34px;border-radius:var(--radius-3xl);border:1px solid var(--border-subtle);background:var(--surface-subtle);transition:transform .35s cubic-bezier(.16,1,.3,1), border-color .3s ease" style-hover="transform:translateY(-6px);border-color:var(--border-hover)">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
             <div style="width:44px;height:44px;border-radius:12px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center">{{ icons.x }}</div>
             <h3 style="font-size:1.3rem;font-weight:700;letter-spacing:-0.01em;margin:0;color:var(--text-dim)">Não, se você…</h3>
@@ -363,7 +439,7 @@
                       </sc-if>
                     </div>
                   </div>
-                  <button type="submit" style="margin-top:8px;width:100%;padding:18px 24px;border:none;border-radius:var(--radius-xl);background:var(--gradient-gold);color:var(--text-on-gold);font-weight:700;font-size:0.86rem;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;box-shadow:var(--shadow-gold-btn);transition:transform .3s, box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-gold-btn-hover)">Completar minha aplicação para a mentoria</button>
+                  <button type="submit" class="btn-shine" style="margin-top:8px;width:100%;padding:18px 24px;border:none;border-radius:var(--radius-xl);background:var(--gradient-gold);color:var(--text-on-gold);font-weight:700;font-size:0.86rem;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;box-shadow:var(--shadow-gold-btn);transition:transform .3s, box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-gold-btn-hover)">Completar minha aplicação para a mentoria</button>
                   <p style="font-size:0.68rem;text-align:center;color:var(--text-muted);margin:4px 0 0;line-height:1.5">Ao enviar, você concorda em ser avaliado(a) pelo nosso processo seletivo.</p>
                 </form>
               </div>
@@ -371,9 +447,9 @@
 
             <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
               <div style="text-align:center;padding:24px 8px">
-                <div style="width:64px;height:64px;margin:0 auto 22px;border-radius:50%;background:var(--gradient-gold);color:var(--text-on-gold);display:flex;align-items:center;justify-content:center">{{ icons.check }}</div>
-                <h3 style="font-size:1.35rem;font-weight:800;letter-spacing:-0.01em;margin:0 0 12px">Aplicação recebida</h3>
-                <p style="font-size:var(--text-body);line-height:1.7;color:var(--text-dim);margin:0 auto;max-width:36ch">Obrigado, Doutor(a). Sua aplicação entrou no processo seletivo. Nossa equipe analisará o seu perfil e o momento do seu consultório e entrará em contato pelo WhatsApp informado.</p>
+                <div class="pop-in" style="width:64px;height:64px;margin:0 auto 22px;border-radius:50%;background:var(--gradient-gold);color:var(--text-on-gold);display:flex;align-items:center;justify-content:center">{{ icons.check }}</div>
+                <h3 class="fade-up-in" style="font-size:1.35rem;font-weight:800;letter-spacing:-0.01em;margin:0 0 12px">Aplicação recebida</h3>
+                <p class="fade-up-in" style="font-size:var(--text-body);line-height:1.7;color:var(--text-dim);margin:0 auto;max-width:36ch">Obrigado, Doutor(a). Sua aplicação entrou no processo seletivo. Nossa equipe analisará o seu perfil e o momento do seu consultório e entrará em contato pelo WhatsApp informado.</p>
               </div>
             </sc-if>
 
@@ -428,6 +504,8 @@ class Component extends DCLogic {
       activity: this.ic([p('M22 12h-4l-3 9L9 3l-3 9H2')]),
       gem: this.ic([p('M6 3h12l4 6-10 13L2 9z'), p('M11 3 8 9l4 13 4-13-3-6'), p('M2 9h20')]),
       check: this.ic([p('M20 6 9 17l-5-5')]),
+      userCircle: this.ic([circle(12, 8, 5), p('M20 21a8 8 0 0 0-16 0')]),
+      users: this.ic([p('M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'), circle(9, 7, 4), p('M22 21v-2a4 4 0 0 0-3-3.87'), p('M16 3.13a4 4 0 0 1 0 7.75')]),
       x: this.ic([p('M18 6 6 18'), p('m6 6 12 12')]),
       shieldCheck: this.ic([p('M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'), p('m9 12 2 2 4-4')]),
       lock: this.ic([rect({ x: 3, y: 11, width: 18, height: 11, rx: 2 }), p('M7 11V7a5 5 0 0 1 10 0v4')]),
@@ -451,8 +529,37 @@ class Component extends DCLogic {
   selectRevenueD = () => this.setState({ revenueValue: 'd', revenueOpen: false });
 
   componentDidMount() {
-    // Reveal is a pure-CSS entrance (see @keyframes in helmet). No JS hiding —
-    // content is always rendered visible so it can never be left blank.
+    // Scroll-reveal: [data-reveal] elements start hidden via CSS (helmet <style>)
+    // and gain .is-in once they cross the viewport threshold. Elements already
+    // on screen at load (e.g. hero) reveal immediately instead of staying blank.
+    this._revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in');
+          this._revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+    document.querySelectorAll('[data-reveal]').forEach((el) => {
+      const delay = el.getAttribute('data-reveal-delay');
+      if (delay) el.style.transitionDelay = delay + 'ms';
+      this._revealObserver.observe(el);
+    });
+
+    // Sticky header gains a shadow once the page scrolls past the top.
+    const header = document.querySelector('[data-site-header]');
+    this._onScroll = () => {
+      const y = window.scrollY || window.pageYOffset || 0;
+      if (header) header.classList.toggle('is-scrolled', y > 8);
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+  }
+
+  componentWillUnmount() {
+    this._revealObserver?.disconnect();
+    if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
   }
 
   renderVals() {
