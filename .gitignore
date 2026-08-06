@@ -1,1 +1,9 @@
 .DS_Store
+
+# Ferramentas de agente/IA locais — configuração e cache de plugins de
+# terceiros (ex.: skill "impeccable"), não fazem parte do ativo do site.
+.agents/
+.gemini/
+.claude/skills/
+.claude/settings.local.json
+.impeccable/
