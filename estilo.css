@@ -1,0 +1,738 @@
+/* ==========================================================================
+   LP Mentoria MMM — estilo do ativo.
+   Direção: BASE CLARA + COR EM BLOCO + MOLDURA QUE ABRAÇA.
+   --------------------------------------------------------------------------
+   Consome os tokens por `ds/tokens/base.css`. PROIBIDO hex e px cru aqui:
+   valor sem token é sinal de que falta token (padrao-design-system.md).
+
+   TRÊS DECISÕES QUE ORGANIZAM ESTE ARQUIVO
+
+   1. FUNDO É CREME. A paleta é declarada fechada em 5 cores e não tem preto;
+      além disso, base clara conversa com o público (consultório médico). As
+      outras quatro cores entram em BLOCO de seção, nunca como enfeite solto.
+
+   2. A MOLDURA CURVA É A ESTRUTURA, não o cartão retangular. O manual descreve
+      o símbolo como moldura que "abraça em vez de cercar" — `.arco` traz essa
+      geometria para as imagens e para o selo. É o que faz a página ser desta
+      marca e não de qualquer uma.
+
+   3. SÍMBOLO E SELO ENTRAM COMO MÁSCARA (`mask-image`), recortados do deck.
+      Assim eles se pintam com token e nunca com cor fora da paleta — o slide
+      de usos incorretos proíbe exatamente isso ("não alterar cores
+      inexistentes na paleta", "não aplicar sombra", "não usar outline").
+
+   CONTRASTE DOS BLOCOS (calculado)
+   marrom/creme 11,36 · creme/verde 6,05 · creme/marrom 11,36 ·
+   marrom/dourado-claro 7,73 · dourado-texto/creme 5,29 · marrom/dourado 4,14.
+   🚫 dourado sobre creme = 2,74 — nunca como texto.
+   ========================================================================== */
+
+@import "ds/tokens/base.css";
+
+/* --- superfícies derivadas -----------------------------------------------
+   Não são cores novas: a paleta segue fechada em 5. São as 5 misturadas entre
+   si para resolver figura/fundo — mesmo recurso do `color-mix` já usado nas
+   trilhas. `areia` afasta uma seção clara do creme puro sem virar bloco de
+   cor cheio; `cartao-*` é a superfície de cartão dentro de cada contexto.
+   Mesmo sistema já validado na `dna-financeiro`, a referência visual mais
+   recente da conta (2026-08-06). */
+:root {
+  --areia:         color-mix(in srgb, var(--marrom)  5%, var(--creme));
+  --areia-topo:    color-mix(in srgb, var(--marrom)  7%, var(--creme));
+  --cartao-claro:  var(--creme);
+  --cartao-verde:  color-mix(in srgb, var(--marrom) 30%, var(--verde));
+  --cartao-marrom: color-mix(in srgb, var(--creme)   7%, var(--marrom));
+  --cartao-dourado-claro: color-mix(in srgb, var(--marrom) 10%, var(--dourado-claro));
+  --linha-cartao:  color-mix(in srgb, var(--marrom) 14%, transparent);
+
+  /* H1 herdava `--lh-tight` (1,12): a 74px isso abre quase meia linha de vão
+     entre as linhas do título do herói. Só para display de hero. */
+  --lh-display: 1.02;
+}
+
+/* --- reset mínimo ------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+body, h1, h2, h3, p, ul, ol, li, figure, figcaption, blockquote { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+img { max-width: 100%; display: block; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  color: var(--marrom);
+  background: var(--creme);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- estrutura ---------------------------------------------------------- */
+.envelope { max-width: var(--coluna); margin-inline: auto; padding-inline: var(--gutter); position: relative; }
+.medida { max-width: var(--measure); }
+.faixa { padding-block: var(--s-96); position: relative; }
+/* 🔴 CORRIGIDO (2026-08-06): faltava o `:not()` do LADO ESQUERDO do seletor.
+   Como estava, QUALQUER `.faixa` clara — mesmo vindo logo depois de um bloco
+   de cor — perdia o padding-top para --s-32, e era exatamente o caso do
+   Diagnóstico (vem depois do bloco verde da frase-mãe): o conteúdo nascia
+   colado na borda superior da seção. A intenção original só vale quando as
+   DUAS seções são claras — duas seções de cor cheia seguidas não existem
+   nesta página, mas se existirem, cada uma já tem ar INTERNO no padding do
+   próprio bloco e não deve ceder nada. */
+.faixa:not([class*="bloco--"]) + .faixa:not([class*="bloco--"]) { padding-top: var(--s-32); }
+
+/* Seção de lista sobre uma superfície levemente distinta do creme puro do
+   corpo — não é bloco de cor (não inverte a tinta), só o bastante para a
+   seção parar de se confundir com a hero/o corpo. */
+.bloco--areia { background: var(--areia); }
+
+/* Cor em BLOCO: cada seção assume uma das quatro cores da marca, com o par de
+   texto já resolvido. Não existe "um pouco de verde aqui" — é bloco ou não é. */
+.bloco--verde  { background: var(--verde);  color: var(--text-on-dark); }
+.bloco--marrom { background: var(--marrom); color: var(--text-on-dark); }
+.bloco--dourado-claro { background: var(--dourado-claro); color: var(--marrom); }
+.bloco--verde h1, .bloco--verde h2, .bloco--verde h3,
+.bloco--marrom h1, .bloco--marrom h2, .bloco--marrom h3 { color: var(--creme); }
+.bloco--verde p, .bloco--marrom p { color: var(--text-on-dark); }
+.bloco--verde em, .bloco--marrom em { color: var(--dourado-claro); }
+
+/* Badge, não linha solta. Fechada em pílula, ela lê como etiqueta da seção —
+   o mesmo vocabulário das tags do deck — em vez de flutuar solta acima do
+   título, que é o que fazia toda tagline da página ler no mesmo peso do
+   título que vem embaixo dela.
+   `padding-inline` assimétrico de propósito: `--tracking-eyebrow` (.18em)
+   soma um vão fantasma DEPOIS da última letra; sem compensar isso o texto
+   nasce visivelmente descentralizado dentro da pílula. */
+.sobretitulo {
+  display: inline-flex; align-items: flex-start; gap: var(--s-8);
+  padding: var(--s-4) calc(var(--s-16) - 0.18em) var(--s-4) var(--s-16);
+  border: var(--traco) solid color-mix(in srgb, var(--verde) 28%, transparent);
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--verde) 7%, transparent);
+  font-size: var(--fs-xs); font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--verde);
+}
+/* `align-items: flex-start` (não `center`) + este nudge: quando o texto do
+   badge quebra em 3 linhas num celular estreito, o ponto ficava centralizado
+   no BLOCO inteiro — pousando ao lado da linha do meio, não da primeira. Preso
+   ao topo e descido `.35em`, ele acompanha sempre a primeira linha. */
+.sobretitulo::before {
+  content: ""; width: var(--s-4); height: var(--s-4); flex: none;
+  margin-top: .35em;
+  border-radius: 50%; background: currentColor;
+}
+/* Sobre bloco de cor cheia, a pílula escurece por dentro para o dourado-claro
+   valer: 4,11 sobre verde/marrom crus não alcança o piso de texto pequeno
+   (12px bold pede 4,5); com o fundo escurecido dá 5,86 sobre verde e 7,73
+   sobre marrom (medidos no navegador). */
+.bloco--verde .sobretitulo, .bloco--marrom .sobretitulo {
+  color: var(--dourado-claro);
+  border-color: color-mix(in srgb, var(--dourado-claro) 34%, transparent);
+  background: color-mix(in srgb, var(--marrom) 55%, transparent);
+}
+.bloco--dourado-claro .sobretitulo {
+  color: var(--marrom);
+  border-color: color-mix(in srgb, var(--marrom) 30%, transparent);
+  background: color-mix(in srgb, var(--creme) 55%, transparent);
+}
+/* Legenda de foto, não etiqueta de seção: a mesma pílula duas vezes na tela
+   (uma para "Quem conduz", outra colada na legenda do retrato logo acima)
+   lia como duas seções disputando o mesmo peso. A legenda perde a moldura e
+   o ponto — vira crédito discreto, sem competir com o eyebrow de verdade. */
+.sobretitulo.sobretitulo--simples {
+  display: block; padding: 0; border: none; background: none;
+  color: var(--dourado-claro);
+}
+.sobretitulo--simples::before { display: none; }
+
+/* Tipografia em escala de display, com o tracking generoso que o manual liga
+   ao pilar clareza — "nada apertado, cada letra com espaço para respirar". */
+h1, h2, h3 {
+  font-family: var(--display); font-weight: var(--fw-normal);
+  line-height: var(--lh-tight); letter-spacing: var(--tracking-display);
+  color: var(--marrom);
+}
+/* O RISCO DESTA PÁGINA, e é um só: os eixos variáveis da Fraunces.
+   SOFT arredonda os terminais e WONK solta as pernas de g/y — exatamente o que o
+   manual elogia na fonte ("as curvas suaves do E e do G trazem leveza e evitam o
+   tom corporativo frio"). Uma Fraunces de prateleira não tem isso ligado; é o que
+   separa esta página de qualquer outra que use a mesma fonte. Concentrado no H1 e
+   na ênfase em itálico — o resto fica quieto. */
+h1 {
+  font-size: clamp(2.6rem, 6.5vw, 4.6rem);
+  font-variation-settings: "SOFT" 45, "WONK" 1;
+  line-height: var(--lh-display);
+}
+em, .enfase, .heroi__frase-mae { font-variation-settings: "SOFT" 70, "WONK" 1; }
+h2 { font-size: clamp(1.9rem, 4vw, 3rem); margin-block: var(--s-16) var(--s-24); }
+h3 { font-size: var(--fs-xl); }
+em, .enfase { font-style: italic; font-weight: var(--fw-semibold); color: var(--verde); }
+
+p + p { margin-top: var(--s-16); }
+.lide { font-size: var(--fs-lg); }
+
+/* --- símbolo e selo, por máscara ---------------------------------------- */
+/* Pintados por `background-color`: sempre token, nunca cor de fora. */
+.simbolo, .selo {
+  display: inline-block;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center;  mask-position: center;
+  -webkit-mask-size: contain;     mask-size: contain;
+  background-color: currentColor;
+}
+.simbolo {
+  -webkit-mask-image: url("assets/simbolo-mascara.png");
+  mask-image: url("assets/simbolo-mascara.png");
+  width: 1.6rem; aspect-ratio: 186 / 213;
+}
+.simbolo--grande { width: 5.5rem; }
+.selo {
+  -webkit-mask-image: url("assets/selo-mascara.png");
+  mask-image: url("assets/selo-mascara.png");
+  width: 7rem; aspect-ratio: 192 / 211;
+}
+
+/* --- moldura que abraça ------------------------------------------------- */
+/* Arco no topo, base assentada: é a geometria do símbolo virada em recorte de
+   imagem. Substitui o cartão retangular como elemento de composição. */
+.arco { border-radius: 50% 50% var(--raio-lg) var(--raio-lg) / 38% 38% var(--raio-lg) var(--raio-lg); overflow: hidden; }
+
+/* --- textura ------------------------------------------------------------ */
+/* Recorte dos grafismos do deck (slides 33 e 36). Entra como transição entre
+   blocos — é o "ar" da marca, não papel de parede atrás do texto. */
+.transicao {
+  height: var(--s-96); background-size: cover; background-position: center;
+  background-image: url("assets/textura-marrom-dourado.webp");
+}
+
+/* --- botões ------------------------------------------------------------- */
+/* Rótulo em MARROM sobre dourado: 4,14 — aprovado para UI/texto grande.
+   Creme sobre dourado seria 2,74. */
+.botao {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--body); font-size: var(--fs-base); font-weight: var(--fw-bold);
+  padding: var(--s-16) var(--s-32);
+  border: none; border-radius: var(--raio-pilula);
+  background: var(--dourado); color: var(--marrom);
+  cursor: pointer; text-decoration: none;
+  transition: filter var(--transicao), transform var(--transicao);
+}
+.botao:hover { filter: brightness(1.06); transform: translateY(-2px); }
+.botao--largo { width: 100%; }
+.botao[disabled] { opacity: .6; cursor: progress; transform: none; }
+
+/* --- botão secundário -----------------------------------------------------
+   Usado onde o CTA não deve competir com o primário (specular-button) da
+   hero/formulário: hoje, o cabeçalho. Sem preenchimento em repouso — só o
+   stroke — e o dourado entra por trás no hover, de baixo pra cima. Mesmo
+   componente da `dna-financeiro` (2026-08-06), trazido tal e qual. */
+.botao--secundario {
+  position: relative; overflow: hidden;
+  gap: var(--s-8); padding: var(--s-8) var(--s-24);
+  font-size: var(--fs-sm); font-weight: var(--fw-semibold); letter-spacing: .01em;
+  background: transparent;
+  /* Tinta em `--dourado-texto` (5,29 sobre creme), não em marrom cheio: o
+     secundário precisa ceder evidência ao primário sem cair abaixo do piso. */
+  color: var(--dourado-texto);
+  border: var(--traco) solid color-mix(in srgb, var(--dourado) 55%, transparent);
+  transition: color var(--transicao), border-color var(--transicao);
+  z-index: 0;
+}
+.botao--secundario::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  /* Preenchimento do hover é `--dourado-texto`, NÃO `--dourado`: o rótulo aqui
+     é 14px semibold, que é texto de CORPO para a WCAG (o piso de 18,66px bold
+     não é alcançado). Marrom sobre `--dourado` é 4,14 e reprovaria; creme
+     sobre `--dourado-texto` é 5,29 e passa. */
+  background: var(--dourado-texto);
+  transform: scaleY(0); transform-origin: bottom;
+  transition: transform var(--transicao);
+}
+.botao--secundario:hover { filter: none; transform: none; color: var(--creme);
+  border-color: var(--dourado-texto); }
+.botao--secundario:hover::before { transform: scaleY(1); }
+.bloco--verde .botao--secundario, .bloco--marrom .botao--secundario {
+  color: var(--text-on-dark);
+  border-color: color-mix(in srgb, var(--dourado-claro) 45%, transparent);
+}
+.bloco--verde .botao--secundario::before, .bloco--marrom .botao--secundario::before {
+  background: var(--dourado-claro);
+}
+.bloco--verde .botao--secundario:hover, .bloco--marrom .botao--secundario:hover {
+  color: var(--marrom); border-color: var(--dourado-claro);
+}
+@media (pointer: coarse) { .botao--secundario { min-height: 2.75rem; } }
+@media (prefers-reduced-motion: reduce) { .botao--secundario::before { transition: none; } }
+
+/* --- topo ------------------------------------------------------------------
+   Header era creme sobre uma hero também creme, separados só por 1px: sticky
+   e conteúdo liam como a MESMA superfície, e a barra perdia estatuto de nível
+   acima. A separação sai de uma areia um passo mais funda que o corpo —
+   figura/fundo, não cor de marca nova — mais a única elevação que o sistema
+   autoriza (`--sombra-sutil`, "só quando for inevitável"; barra fixa sobre
+   conteúdo rolante é o caso que ele descreve). */
+.topo {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--areia-topo);
+  border-bottom: var(--traco) solid color-mix(in srgb, var(--marrom) 12%, transparent);
+  box-shadow: var(--sombra-sutil);
+}
+.topo__envelope { display: flex; align-items: center; justify-content: space-between; gap: var(--s-16); padding-block: var(--s-16); }
+/* No celular "Aplicar agora" quebrava em duas linhas dentro da pilula do topo e
+   engordava o cabecalho fixo. O rotulo e o mesmo da hero de proposito (um nome
+   por acao), entao quem cede e o respiro lateral, nao o texto. */
+.topo .botao { white-space: nowrap; }
+/* "CLINICA FINANCEIRA" tambem quebrava, o que somava uma terceira linha ao
+   cabecalho FIXO -- 100px de topo grudado numa tela de 800px. */
+.topo .marca__descritor { white-space: nowrap; }
+@media (max-width: 30rem) { .topo .botao { padding-inline: var(--s-24); } }
+.marca { display: flex; align-items: center; gap: var(--s-8); text-decoration: none; color: var(--marrom); }
+/* Nome e descritor herdavam `--lh-body` (1,65): a 22px isso é 36px de caixa de
+   linha para um glifo de ~28px, e o descritor abaixo nascia visualmente longe
+   do wordmark. Com `line-height: 1` nos dois e só `--s-4` entre eles, o
+   descritor senta logo abaixo do nome, do jeito que um lockup de marca gruda
+   a tagline — o mesmo ajuste já validado na `dna-financeiro`. */
+.marca__texto { display: flex; flex-direction: column; gap: var(--s-4); }
+.marca__nome { font-family: var(--display); font-size: var(--fs-xl); line-height: 1; letter-spacing: .1em; }
+.marca__descritor { display: block; font-family: var(--body); font-size: .6rem; line-height: 1; letter-spacing: .22em; text-transform: uppercase; color: var(--verde); }
+
+/* --- herói --------------------------------------------------------------
+   Bloco marrom-escuro (2026-08-06): a hero era creme igual ao resto do corpo
+   e não se diferenciava de seção nenhuma. `.bloco--marrom` já resolve texto,
+   `em`, `.sobretitulo` sozinho — só o botão primário (specular, cor própria
+   via `data-sb`/`style`) fica de fora de propósito, como pedido. */
+.heroi { padding-block: var(--s-64) var(--s-96); }
+/* `stretch`, não `center`: o retrato passa a fechar a MESMA altura da coluna
+   de texto, as duas colunas alinhando em cima e embaixo — só possível depois
+   de tirar o selo que pendurava por baixo da figura (ver nota abaixo). */
+.heroi__grade { display: grid; gap: var(--s-48); align-items: stretch; }
+@media (min-width: 56rem) { .heroi__grade { grid-template-columns: 1.15fr .85fr; gap: var(--s-64); } }
+.heroi h1 { margin-block: var(--s-24) var(--s-24); }
+.heroi__figura { position: relative; }
+.heroi__figura img { aspect-ratio: 4 / 5; width: 100%; height: auto; object-fit: cover; object-position: 50% 14%; }
+/* `height: auto` é obrigatório, não higiene: o atributo `height` do elemento
+   de imagem entra como hint de apresentação e vale como altura, e
+   `aspect-ratio` só decide o tamanho quando UMA das dimensões é `auto`.
+   `height: 100%` sozinho não casa as alturas: a imagem continua no fluxo e a
+   altura intrínseca dela é o que estica a linha do grid. Tirando a imagem do
+   fluxo (`absolute`) a altura da linha passa a ser decidida só pela coluna de
+   texto, e a figura preenche o que sobrou — mesmo recurso da `dna-financeiro`. */
+@media (min-width: 56rem) {
+  .heroi__figura { height: 100%; min-height: 0; }
+  .heroi__figura img { position: absolute; inset: 0; height: 100%; width: 100%; aspect-ratio: auto; }
+}
+
+/* --- diagnóstico: cartões fechados ---------------------------------------
+   Eram filetes horizontais soltos sobre a mesma superfície da seção: os
+   quatro pontos cegos liam como um texto único cortado, sem onde ancorar
+   hover. Agora cada um é uma caixa fechada, sobre creme, dentro de uma seção
+   de areia (`.bloco--areia`) — a diferença de superfície é o que faz o
+   cartão existir sem precisar de sombra. Cada cartão tem hierarquia própria
+   (título em verde + corpo) e uma cor de preenchimento diferente do fundo da
+   seção, como pedido. */
+.diagnostico { display: grid; gap: var(--s-24); margin-top: var(--s-48); }
+@media (min-width: 48rem) { .diagnostico { grid-template-columns: repeat(2, 1fr); gap: var(--s-32); } }
+.diagnostico li {
+  position: relative; overflow: hidden;
+  padding: var(--s-32);
+  background: var(--cartao-claro);
+  border: var(--traco) solid var(--linha-cartao);
+  border-radius: var(--raio);
+  transition: transform var(--transicao), border-color var(--transicao);
+}
+/* Filete que se desenha da esquerda no hover — o mesmo gesto em todo cartão
+   da página, em vez de um efeito diferente por seção. */
+.diagnostico li::after {
+  content: ""; position: absolute; inset-inline: 0; top: 0;
+  height: var(--traco-espesso); background: var(--verde);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform var(--transicao);
+}
+.diagnostico li:hover {
+  transform: translateY(calc(var(--s-4) * -1));
+  border-color: color-mix(in srgb, var(--verde) 38%, transparent);
+}
+.diagnostico li:hover::after { transform: scaleX(1); }
+.diagnostico h3 { margin: 0 0 var(--s-8); color: var(--verde); }
+
+/* --- mecanismo: quatro blocos de cor ------------------------------------ */
+.mecanismo { display: grid; gap: 0; margin-top: var(--s-48); }
+@media (min-width: 48rem) { .mecanismo { grid-template-columns: repeat(2, 1fr); } }
+.mecanismo > div { position: relative; padding: var(--s-48) var(--s-32); transition: filter var(--transicao), transform var(--transicao); }
+.mecanismo > div:hover { filter: brightness(1.08); transform: translateY(calc(var(--s-4) * -1)); z-index: 1; }
+.mecanismo p { font-size: var(--fs-sm); }
+/* "O que é" e "o benefício" separados em duas linhas de hierarquia diferente
+   — rótulo pequeno, maiúsculo e discreto acima; corpo no peso normal abaixo —
+   em vez de um lead-in inline disputando a mesma frase. */
+.mecanismo__rotulo {
+  display: block; margin-bottom: var(--s-4);
+  font-size: var(--fs-xs); font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  opacity: .72;
+}
+
+/* --- etapas: cartões interativos ------------------------------------------
+   Eram filetes horizontais soltos (`border-top`), sem onde ancorar hover.
+   Mesmo tratamento de cartão do `.diagnostico`, com destaque no símbolo. */
+.etapa {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--s-24);
+  padding: var(--s-24); margin-top: var(--s-16);
+  background: var(--cartao-claro);
+  border: var(--traco) solid var(--linha-cartao);
+  border-radius: var(--raio);
+  align-items: start;
+  transition: transform var(--transicao), border-color var(--transicao);
+}
+.etapa:first-of-type, .entrega__rotulo + .etapa { margin-top: 0; }
+.etapa:hover {
+  transform: translateY(calc(var(--s-4) * -1));
+  border-color: color-mix(in srgb, var(--verde) 38%, transparent);
+}
+.etapa .simbolo { color: var(--verde); margin-top: .35rem; transition: transform var(--transicao); }
+.etapa:hover .simbolo { transform: scale(1.15); }
+.bloco--marrom .etapa { background: var(--cartao-marrom); border-color: var(--hairline-dark); }
+.bloco--marrom .etapa .simbolo { color: var(--dourado-claro); }
+
+/* --- autoridade --------------------------------------------------------- */
+.autoridade { display: grid; gap: var(--s-48); align-items: center; }
+@media (min-width: 56rem) { .autoridade { grid-template-columns: .8fr 1.2fr; gap: var(--s-64); } }
+.autoridade__figura { position: relative; }
+.autoridade__figura img { aspect-ratio: 4 / 5; max-height: 30rem; width: 100%; object-fit: cover; object-position: 54% center; filter: saturate(.68); }
+
+/* --- critérios ---------------------------------------------------------- */
+/* Seção própria, com fundo em bloco de cor (`.bloco--dourado-claro`, no HTML)
+   em vez de creme igual ao resto — para não ler como continuação das seções
+   vizinhas. Dentro dela, "Sim" é a caixa em primeiro plano: preenchimento
+   sólido, invertido, para saltar sobre o dourado-claro. "Não" recua para
+   segundo plano: mesma cor da seção, só que MAIS OPACA — não é "sem cor" (o
+   que o tornaria transparente e sumiria sobre o próprio fundo), é um
+   preenchimento distinto que se declara secundário pela opacidade, não pela
+   ausência de cor. */
+.criterios { display: grid; gap: var(--gap); margin-top: var(--s-32); }
+@media (min-width: 48rem) { .criterios { grid-template-columns: repeat(2, 1fr); } }
+.criterio { padding: var(--s-32); border-radius: var(--raio-lg); transition: transform var(--transicao), border-color var(--transicao), background var(--transicao); }
+.criterio--sim { background: var(--marrom); color: var(--text-on-dark); }
+.criterio--sim h3 { color: var(--creme); }
+.criterio--sim .criterio__marca { color: var(--dourado-claro); }
+.criterio--sim:hover { transform: translateY(calc(var(--s-4) * -1)); }
+.criterio--nao {
+  background: color-mix(in srgb, var(--marrom) 12%, transparent);
+  border: var(--traco) solid color-mix(in srgb, var(--marrom) 18%, transparent);
+  color: color-mix(in srgb, var(--marrom) 82%, transparent);
+}
+.criterio--nao h3 { color: color-mix(in srgb, var(--marrom) 82%, transparent); }
+.criterio--nao:hover {
+  border-color: color-mix(in srgb, var(--marrom) 32%, transparent);
+  background: color-mix(in srgb, var(--marrom) 16%, transparent);
+}
+.criterio li { display: grid; grid-template-columns: auto 1fr; gap: var(--s-8); margin-bottom: var(--s-16); font-size: var(--fs-sm); }
+.criterio__marca { font-weight: var(--fw-bold); }
+
+/* --- aplicação: copy × formulário lado a lado --------------------------- */
+/* A v2 empilhava numa coluna de 34rem e a seção terminava num paredão de campos.
+   Lado a lado, a razão de existir fica visível enquanto se preenche. */
+.aplicacao { display: grid; gap: var(--s-48); align-items: start; }
+@media (min-width: 56rem) {
+  .aplicacao { grid-template-columns: 1fr 1fr; gap: var(--s-96); }
+  /* A copy é bem mais curta que o formulário; presa, ela acompanha o
+     preenchimento em vez de sumir no topo. Mesmo recurso da lista de entregas.
+     Só no desktop — no celular as duas viram pilha e sticky não faz sentido. */
+  .aplicacao__copy { position: sticky; top: var(--s-96); }
+}
+.aplicacao__processo { margin-top: var(--s-32); display: grid; gap: var(--s-16); }
+.aplicacao__processo li { display: grid; grid-template-columns: auto 1fr; gap: var(--s-16);
+  align-items: start; font-size: var(--fs-sm); }
+/* Símbolo é grafismo, não texto: sobre verde o dourado-claro dá 4,11, que passa
+   o piso de 3,0 de elemento não textual. O TEXTO ao lado fica em creme (6,05) —
+   `--text-on-dark-soft` reprovaria aqui (4,03), armadilha nº 5 da paleta. */
+.bloco--verde .aplicacao__processo .simbolo { color: var(--dourado-claro); margin-top: .1rem; }
+
+/* --- formulário --------------------------------------------------------- */
+.formulario { display: grid; gap: var(--s-16); }
+.campo { display: grid; gap: var(--s-8); }
+.campo label { font-size: var(--fs-xs); font-weight: var(--fw-bold); letter-spacing: .08em; text-transform: uppercase; color: var(--dourado-claro); }
+.campo input, .campo select {
+  font-family: var(--body); font-size: var(--fs-base);
+  padding: var(--s-16); width: 100%;
+  color: var(--marrom); background: var(--creme);
+  border: var(--traco) solid transparent; border-radius: var(--raio-sm);
+}
+.campo input:focus-visible, .campo select:focus-visible { outline: var(--traco-espesso) solid var(--dourado-claro); outline-offset: var(--s-4); }
+.campo__erro { font-size: var(--fs-xs); color: var(--dourado-claro); min-height: 1.1em; font-weight: var(--fw-bold); }
+.campo--invalido input, .campo--invalido select { box-shadow: inset 0 0 0 var(--traco-espesso) var(--fail); }
+
+/* Dropdown com identidade própria, não o menu cru do navegador: some o
+   chevron nativo (`appearance: none`) e desenha o nosso, na mesma tinta
+   marrom da paleta — a "flecha" é a única coisa que se herda do sistema
+   operacional, e mesmo ela agora é nossa. O SVG entra em data-URI porque é
+   `background-image`, que não lê `var()`; a cor é a mesma de `--marrom`
+   (#3E2B20) escrita por extenso só aqui, pelo mesmo motivo que o
+   specular-button já hardcoda cor em atributo. */
+.campo select {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  padding-right: var(--s-48);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233E2B20' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--s-16) center;
+  background-size: 1rem;
+  cursor: pointer;
+}
+.campo select:invalid { color: color-mix(in srgb, var(--marrom) 55%, transparent); }
+
+/* Honeypot: fora da tela, mas não `display:none` — bot que lê CSS ignora o
+   escondido e preenche o visível. */
+.armadilha { position: absolute; left: -9999px; width: var(--traco); height: var(--traco); overflow: hidden; }
+
+.consentimento { display: grid; grid-template-columns: auto 1fr; gap: var(--s-8); align-items: start; font-size: var(--fs-sm); }
+/* Checkbox com identidade própria: o input nativo some (opacidade zero, mas
+   ainda clicável/focável — acessibilidade não perde nada), e quem aparece é
+   `.consentimento__marca`, pintada nos tokens da marca em vez do azul de
+   sistema do navegador. */
+.consentimento__caixa { position: relative; width: 1.15rem; height: 1.15rem; margin-top: .2rem; flex: none; }
+.consentimento__caixa input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.consentimento__marca {
+  position: absolute; inset: 0; pointer-events: none;
+  border: var(--traco-espesso) solid var(--hairline-dark);
+  border-radius: var(--raio-sm);
+  transition: background var(--transicao), border-color var(--transicao);
+}
+.consentimento__caixa input:checked ~ .consentimento__marca { background: var(--dourado); border-color: var(--dourado); }
+.consentimento__caixa input:checked ~ .consentimento__marca::after {
+  content: ""; position: absolute; left: 21%; top: 42%; width: .55rem; height: .3rem;
+  border-left: var(--traco-espesso) solid var(--marrom); border-bottom: var(--traco-espesso) solid var(--marrom);
+  transform: rotate(-45deg);
+}
+.consentimento__caixa input:focus-visible ~ .consentimento__marca { outline: var(--traco-espesso) solid var(--dourado-claro); outline-offset: var(--s-4); }
+.campo--invalido .consentimento__marca { border-color: var(--fail); }
+
+.aviso-envio { font-size: var(--fs-sm); padding: var(--s-16); border-radius: var(--raio-sm); }
+.aviso-envio[hidden] { display: none; }
+/* Borda inteira, não faixa lateral grossa: `border-left` espesso em cartão é o
+   tell de UI gerada por IA que o detector do impeccable aponta. */
+.aviso-envio--erro { background: var(--creme); border: var(--traco-espesso) solid var(--fail); color: var(--marrom); }
+
+/* 🔴 DEFEITO CORRIGIDO EM 2026-07-30, achado ao montar a cópia de validação.
+   A linha acima é (0,1,0) e `.bloco--verde p` é (0,1,1): dentro do bloco de
+   aplicação, `p` VENCIA e a mensagem de erro saía creme sobre creme —
+   contraste 1,00, invisível, sem uma linha no console. Medido no navegador.
+   O tamanho do estrago: esta página inteira nasceu para consertar "falha
+   silenciosa", e a falha do POST era literalmente invisível desde 29/07.
+   Prefixar com o bloco (0,2,0) é o que faz a regra valer. Vale para qualquer
+   aviso dentro de bloco de cor, por isso a regra é do `.aviso-envio`, não do
+   modificador — variante nova nasce protegida. */
+.bloco--verde .aviso-envio, .bloco--marrom .aviso-envio { color: var(--marrom); }
+
+/* O link de saída herdava o azul cru do navegador (#0000EE) — cor que não
+   existe na paleta fechada de 5 cores. Herda a tinta do aviso e se distingue
+   pelo sublinhado, que é o canal acessível: cor sozinha não serve. */
+.aviso-envio a { color: inherit; text-decoration: underline; }
+
+/* --- rodapé ------------------------------------------------------------- */
+.rodape { background: var(--marrom); color: var(--text-on-dark-soft); padding-block: var(--s-48); font-size: var(--fs-sm); }
+.rodape strong { color: var(--creme); }
+.rodape .selo { color: var(--dourado-claro); }
+
+/* Mesmo layout de rodapé da `dna-financeiro`: selo + lockup de marca de um
+   lado, redes do outro, em vez do bloco de texto solto que havia aqui. */
+.rodape--completo { padding-block: var(--s-64) 0; }
+.rodape__grade { display: grid; gap: var(--s-48); }
+@media (min-width: 48rem) {
+  .rodape__grade { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--s-64); align-items: start; }
+}
+.rodape__marca { display: grid; grid-template-columns: auto 1fr; gap: var(--s-24); align-items: start; }
+.rodape__marca .selo { width: 4.5rem; }
+.rodape__descricao { margin-top: var(--s-8); max-width: 44ch; }
+
+/* Ícone sozinho obriga a adivinhar a rede — pílula com rótulo em vez de uma
+   fileira nua de glifos, para quem enxerga também ler qual é qual. */
+.rodape__redes { display: flex; flex-wrap: wrap; gap: var(--s-8); }
+.rodape__rede {
+  display: inline-flex; align-items: center; gap: var(--s-8);
+  padding: var(--s-8) var(--s-16);
+  border: var(--traco) solid var(--hairline-dark);
+  border-radius: var(--raio-pilula);
+  color: var(--text-on-dark); text-decoration: none;
+  transition: background var(--transicao), border-color var(--transicao), color var(--transicao);
+}
+/* Dourado-claro é FUNDO aqui, com tinta marrom por cima (7,73) — nunca o
+   contrário. */
+.rodape__rede:hover { background: var(--dourado-claro); border-color: var(--dourado-claro); color: var(--marrom); }
+.rodape__rede .icone { width: 1rem; height: 1rem; }
+@media (pointer: coarse) { .rodape__rede { min-height: 2.75rem; } }
+
+.rodape__base { margin-top: var(--s-48); padding-block: var(--s-24); border-top: var(--traco) solid var(--hairline-dark); }
+
+/* --- revelação ------------------------------------------------------------
+   Duração PRÓPRIA (.8s), mais longa que `--transicao` (.3s, o tempo de
+   feedback de hover): a antiga usava a mesma curta dos dois, e a revelação
+   terminava de tocar enquanto o elemento ainda estava subindo pela tela —
+   quem rolava via o texto já parado, nunca o movimento acontecer. A variável
+   `--revela-atraso` é escrita por `revela.js`, uma por elemento, conforme a
+   posição entre os irmãos que também têm `[data-revela]` — é o que faz
+   badge → título → texto entrarem em cascata, e os cards de uma grade
+   entrarem um a um. Tem que vir DEPOIS da shorthand `transition`: a shorthand
+   zera qualquer sub-propriedade que não liste, delay incluso. */
+[data-revela] {
+  opacity: 0; transform: translateY(1.75rem);
+  transition: opacity .8s cubic-bezier(.16, 1, .3, 1), transform .8s cubic-bezier(.16, 1, .3, 1);
+  transition-delay: var(--revela-atraso, 0s);
+}
+[data-revela].dentro { opacity: 1; transform: none; }
+
+/* --- números (dentro da seção PROVA, bloco marrom) ---------------------- */
+/* Duas versões caíram antes: faixa solta em creme chapado (reprovada) e
+   pendurada na tese, em verde. Agora vivem onde pertencem — no bloco `Prova`.
+   ✅ Em MARROM o numeral dourado-claro dá 7,73, o melhor par da paleta. Em verde
+   dava 4,11 e só passava por ser display ≥ 48px.
+   ⚠️ Seletor com o bloco na frente DE PROPÓSITO: `.numeros__valor` sozinho é
+   (0,1,0) e perde para `.bloco--marrom p` (0,1,1), que pinta todo p de creme.
+   Sem isto o numeral sai creme e some na hierarquia — já aconteceu uma vez. */
+/* Cada número dentro do próprio cartão. 🔴 CORRIGIDO (2026-08-06): a versão
+   anterior usava `flex` com largura individual por conteúdo — o cartão
+   reservado (bem mais curto) ficava estreito, e as três colunas não batiam
+   com a grade de `.prova-slots` (`repeat(3, 1fr)`) logo abaixo, na mesma
+   seção. Mesma grade, mesmo `gap`, para os dois grupos de cartões alinharem
+   como uma coluna só, não dois ritmos diferentes empilhados. */
+.numeros { list-style: none; display: grid; gap: var(--s-24); margin-top: var(--s-48);
+  padding-top: var(--s-32); border-top: var(--traco) solid var(--hairline-dark); }
+@media (min-width: 48rem) { .numeros { grid-template-columns: repeat(3, 1fr); } }
+.numeros__item {
+  padding: var(--s-32);
+  background: var(--cartao-marrom);
+  border: var(--traco) solid var(--hairline-dark);
+  border-radius: var(--raio);
+  transition: transform var(--transicao), border-color var(--transicao);
+}
+.numeros__item:hover {
+  transform: translateY(calc(var(--s-4) * -1));
+  border-color: color-mix(in srgb, var(--dourado-claro) 55%, transparent);
+}
+.bloco--marrom .numeros__valor, .bloco--verde .numeros__valor {
+  font-family: var(--display); font-size: clamp(3.2rem, 8vw, 4.6rem); line-height: .85;
+  color: var(--dourado-claro); font-variation-settings: "SOFT" 45, "WONK" 1; }
+.numeros__mais { font-size: .5em; vertical-align: super; }
+.numeros__rotulo { margin-top: var(--s-8); font-weight: var(--fw-semibold); }
+.numeros__nota { font-size: var(--fs-sm); margin-top: var(--s-4); color: var(--text-on-dark); }
+/* 🔴 Lugar RESERVADO do número de resultado — não existe em fonte e não se
+   estima. Mesmo tratamento dos depoimentos: reserva visível para aprovação,
+   que NÃO vai ao ar assim. */
+.bloco--marrom .numeros__item--reservado .numeros__nota { color: var(--text-on-dark-soft); }
+/* Faltava `padding-block`: só o `padding-inline` deixava a caixa colada em
+   cima e embaixo do "?", sem o respiro que a moldura tracejada pede. */
+.bloco--marrom .numeros__valor--vazio { opacity: .5;
+  border: var(--traco) dashed var(--hairline-dark); border-radius: var(--raio-sm);
+  display: inline-block; padding: var(--s-8) var(--s-24); }
+
+/* --- entrega: lista × maquetes ------------------------------------------- */
+/* A divisão "na entrada" × "todos os meses" substitui o numeral 01–05 da v1:
+   só o diagnóstico é etapa, os outros quatro são simultâneos. */
+.entrega { display: grid; gap: var(--s-64); align-items: start; }
+@media (min-width: 56rem) {
+  .entrega { grid-template-columns: 1fr 1fr; }
+  /* A coluna das maquetes e ~400px mais alta que a lista, o que deixava meia
+     tela de creme vazio a esquerda enquanto a terceira maquete passava. A lista
+     fica presa: o entregavel continua legivel enquanto a maquete dele desfila.
+     So no desktop -- no celular as duas viram uma pilha e sticky nao faz sentido. */
+  .entrega__lista { position: sticky; top: var(--s-96); }
+}
+.entrega__rotulo { font-family: var(--body); font-size: var(--fs-xs); text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow); color: var(--dourado-texto);
+  margin-top: var(--s-48); margin-bottom: var(--s-8); }
+.entrega__rotulo:first-child { margin-top: 0; }
+
+/* --- maquetes ------------------------------------------------------------- */
+/* Tangibilizam o entregável. São ILUSTRAÇÃO (`aria-hidden` no HTML) e por isso
+   não carregam informação que só exista nelas. Sem sombra — a regra da marca
+   separa plano por COR, não por elevação; aqui quem dá profundidade é a escada
+   para a direita no desktop (cada maquete recua mais), e no celular é pilha.
+   NÃO sobrepor: cada maquete tem legenda embaixo, e sobreposição a cobriria. */
+.maquetes { display: grid; gap: var(--s-32); }
+.maquete { margin: 0; }
+.maquete__legenda { font-size: var(--fs-sm); margin-top: var(--s-16);
+  color: color-mix(in srgb, var(--marrom) 76%, transparent); }
+@media (min-width: 56rem) {
+  .maquetes { gap: var(--s-48); }
+  /* Escada de 24 em 24, passo uniforme para o recuo ler como escada e não como
+     desalinho. `.maquete--plano` é a primeira e não recua — por isso não tem
+     regra aqui; a classe fica como identificador da peça, igual às outras duas,
+     e não é resto de código removido. */
+  .maquete--nave { margin-left: var(--s-24); }
+  .maquete--fone { margin-left: var(--s-48); }
+}
+.maquete__etiqueta { font-size: var(--fs-xs); text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow); margin-bottom: var(--s-16); }
+
+/* ⚠️ O painel marrom do DIAGNÓSTICO saiu em 30/07 (seção pesada demais com
+   quatro peças), e com ele todo o CSS de `__corpo`/`__linha`/`__valor`/`__marca`.
+   Removido em vez de comentado: regra órfã é lixo que o próximo leitor tenta
+   entender. O histórico está no git e no README. */
+
+/* maquetes 1 e 2 · as duas telas de produto (planejamento e área de membros).
+   Compartilham `__janela`/`__barra`: o que muda entre elas é só o recuo da escada.
+   Branco aqui é legítimo: superfície de UI, não fundo
+   de peça. Sem domínio na barra — `app.<algo>` não existe e não se inventa. */
+.maquete__janela { background: var(--white); border-radius: var(--raio-lg); overflow: hidden; }
+.maquete__barra { background: var(--marrom); display: flex; align-items: center; gap: var(--s-8);
+  padding: var(--s-8) var(--s-16); }
+.maquete__ponto { width: .5rem; height: .5rem; border-radius: 50%; background: var(--text-on-dark-soft); }
+.maquete__aba { margin-left: var(--s-8); font-size: var(--fs-xs); color: var(--text-on-dark);
+  text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); }
+/* O print entra dentro da moldura de navegador. O `overflow: hidden` do
+   `.maquete__janela` é o que faz o canto arredondado valer para a imagem. */
+.maquete__janela img { width: 100%; height: auto; display: block; }
+
+/* maquete 4 · a comunidade. A segunda voz é a do LEITOR, não um cliente
+   fictício: depoimento em maquete seria prova fabricada. */
+.maquete__aparelho { background: var(--verde); color: var(--text-on-dark);
+  border-radius: var(--raio-lg); padding: var(--s-24); }
+.maquete__aparelho .maquete__etiqueta { color: var(--text-on-dark); }
+.bolha { background: color-mix(in srgb, var(--creme) 8%, transparent); border-radius: var(--raio);
+  padding: var(--s-16); font-size: var(--fs-sm); margin-top: var(--s-8); max-width: 88%; }
+.bolha--eu { background: var(--dourado-claro); color: var(--marrom); margin-left: auto; }
+.bolha__autor { display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold);
+  color: var(--text-on-dark); margin-bottom: var(--s-4); }
+.maquete__digitando { display: flex; gap: var(--s-4); margin-top: var(--s-16); }
+.maquete__digitando span { width: .375rem; height: .375rem; border-radius: 50%;
+  background: var(--text-on-dark-soft); animation: pulsa 1.4s ease-in-out infinite; }
+.maquete__digitando span:nth-child(2) { animation-delay: .2s; }
+.maquete__digitando span:nth-child(3) { animation-delay: .4s; }
+@keyframes pulsa { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+
+/* --- prova: lugares reservados ------------------------------------------- */
+/* 🔴 Estado de APROVAÇÃO DE LAYOUT. Não publicar assim: preencher os 3
+   depoimentos ou devolver o `hidden` à seção `#prova`. */
+.prova-slots { display: grid; gap: var(--s-24); margin-top: var(--s-48); }
+@media (min-width: 48rem) { .prova-slots { grid-template-columns: repeat(3, 1fr); } }
+.slot { border: var(--traco) dashed color-mix(in srgb, var(--marrom) 34%, transparent);
+  border-radius: var(--raio-lg); padding: var(--s-32) var(--s-24); text-align: center; }
+/* A seção PROVA virou bloco marrom: tracejado e rótulo precisam do par claro. */
+.bloco--marrom .slot { border-color: var(--hairline-dark); }
+.bloco--marrom .slot__aviso { color: var(--dourado-claro); }
+.bloco--marrom .slot__nota { color: var(--text-on-dark-soft); }
+.slot__aviso { font-family: var(--display); font-size: var(--fs-lg); color: var(--dourado-texto); }
+/* 72%, nao 64%: medido em 2026-07-30, 64% da 4,05 sobre creme e reprova AA em
+   texto pequeno. 72% = 5,04. O mesmo vale para .numeros__nota. */
+.slot__nota { font-size: var(--fs-sm); margin-top: var(--s-8);
+  color: color-mix(in srgb, var(--marrom) 72%, transparent); }
+/* Maiúscula só visual (`::first-letter`), sem tocar o texto-fonte: a regra
+   desta rodada proíbe mudar copy, e pontuação final entraria como caractere
+   novo — por isso fica de fora daqui. */
+.slot__nota::first-letter { text-transform: uppercase; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  [data-revela] { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .botao:hover { transform: none; }
+  .maquete__digitando span { animation: none; opacity: .6; }
+  .diagnostico li:hover,
+  .etapa:hover,
+  .numeros__item:hover,
+  .criterio:hover,
+  .mecanismo > div:hover { transform: none; }
+  .etapa:hover .simbolo { transform: none; }
+  .mecanismo > div:hover { filter: none; }
+}
+
+/* GERADO por publicar.mjs (cópia de validação) — não existe no ativo de origem. */
+.aviso-envio--validacao { background: var(--creme);
+  border: var(--traco-espesso) solid var(--dourado); }
