@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aplicação recebida | MEGER</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<!-- Página de verdade, não estado de tela. A v1 trocava um `submitted` no React
+     e dizia "aplicação recebida" sem ter recebido nada. Aqui só se chega depois
+     de o webhook responder 200, o que significa: lead registrado e e-mail
+     disparado. -->
+
+<header class="topo">
+  <div class="envelope topo__envelope">
+    <a href="index.html" class="marca" aria-label="MEGER, Clínica Financeira">MEGER
+      <span class="marca__descritor">Clínica Financeira</span>
+    </a>
+  </div>
+</header>
+
+<main>
+  <section class="faixa" style="padding-block: var(--s-128)">
+    <div class="envelope">
+      <div class="medida">
+        <p class="sobretitulo">Aplicação recebida</p>
+        <h1 style="margin-block: var(--s-16) var(--s-24)">Obrigado, <em>Doutor(a)</em>.</h1>
+        <p class="lide">A sua aplicação entrou no processo seletivo da Mentoria Mente Médica Milionária.</p>
+
+        <div class="cartao" style="margin-top: var(--s-32)">
+          <h3>O que acontece agora</h3>
+          <div class="etapa" style="padding-top: var(--s-24)">
+            <span class="etapa__selo" aria-hidden="true">01</span>
+            <div><p>Analisamos o seu perfil e o momento do seu consultório.</p></div>
+          </div>
+          <div class="etapa">
+            <span class="etapa__selo" aria-hidden="true">02</span>
+            <div><p>Se houver encaixe, a equipe entra em contato pelo <strong>WhatsApp que você
+              informou, em até 2 dias úteis</strong>.</p></div>
+          </div>
+          <div class="etapa">
+            <span class="etapa__selo" aria-hidden="true">03</span>
+            <div><p>Nessa conversa você entende como funciona o acompanhamento e decide com calma.</p></div>
+          </div>
+        </div>
+
+        <p style="margin-top: var(--s-32)">Você também vai receber um e-mail de confirmação. Se ele não
+          aparecer em alguns minutos, confira a caixa de spam.</p>
+
+        <p style="margin-top: var(--s-32)">
+          <a href="https://wa.me/5511941335119" class="botao">Falar agora pelo WhatsApp</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <div class="envelope">
+    <p><strong style="color: var(--creme)">MEGER · Clínica Financeira</strong></p>
+    <p style="margin-top: var(--s-8)">Conteúdo educativo; não constitui recomendação individual de investimento.</p>
+  </div>
+</footer>
+
+</body>
+</html>
