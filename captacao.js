@@ -159,7 +159,8 @@
       spam_score: 0,
       custom: {
         especialidade: document.getElementById('especialidade').value.trim(),
-        faturamento: document.getElementById('faturamento').value
+        faturamento: document.getElementById('faturamento').value,
+        instagram: document.getElementById('instagram').value.trim()
       },
       attr: attr,
       utm_source: utms.utm_source || '',

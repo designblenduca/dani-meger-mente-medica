@@ -4,8 +4,8 @@
     {
       "name": "static-site",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8000", "--directory", "/Volumes/WD Green SSD/Vibecoding/dani-meger-mentoria-mm"],
-      "port": 8000
+      "runtimeArgs": ["-m", "http.server", "8010", "--directory", "/Volumes/WD Green SSD/Vibecoding/dani-meger-mentoria-mm"],
+      "port": 8010
     }
   ]
 }
