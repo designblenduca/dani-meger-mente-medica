@@ -103,7 +103,7 @@ body {
    soma um vão fantasma DEPOIS da última letra; sem compensar isso o texto
    nasce visivelmente descentralizado dentro da pílula. */
 .sobretitulo {
-  display: inline-flex; align-items: flex-start; gap: var(--s-8);
+  display: inline-flex; align-items: center; gap: var(--s-8);
   padding: var(--s-4) calc(var(--s-16) - 0.18em) var(--s-4) var(--s-16);
   border: var(--traco) solid color-mix(in srgb, var(--verde) 28%, transparent);
   border-radius: var(--raio-pilula);
@@ -112,13 +112,13 @@ body {
   letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
   color: var(--verde);
 }
-/* `align-items: flex-start` (não `center`) + este nudge: quando o texto do
-   badge quebra em 3 linhas num celular estreito, o ponto ficava centralizado
-   no BLOCO inteiro — pousando ao lado da linha do meio, não da primeira. Preso
-   ao topo e descido `.35em`, ele acompanha sempre a primeira linha. */
+/* `align-items: center`: o ponto acompanha o centro vertical do texto, não a
+   primeira linha. Todo `.sobretitulo` desta página é de uma linha só (o
+   texto mais longo cabe em telas de até 360px), então não há caso de quebra
+   a proteger — se um `.sobretitulo` futuro quebrar em várias linhas, revisar
+   este alinhamento antes de reintroduzir o nudge de topo. */
 .sobretitulo::before {
   content: ""; width: var(--s-4); height: var(--s-4); flex: none;
-  margin-top: .35em;
   border-radius: 50%; background: currentColor;
 }
 /* Sobre bloco de cor cheia, a pílula escurece por dentro para o dourado-claro
@@ -613,15 +613,6 @@ p + p { margin-top: var(--s-16); }
 .numeros__mais { font-size: .5em; vertical-align: super; }
 .numeros__rotulo { margin-top: var(--s-8); font-weight: var(--fw-semibold); }
 .numeros__nota { font-size: var(--fs-sm); margin-top: var(--s-4); color: var(--text-on-dark); }
-/* 🔴 Lugar RESERVADO do número de resultado — não existe em fonte e não se
-   estima. Mesmo tratamento dos depoimentos: reserva visível para aprovação,
-   que NÃO vai ao ar assim. */
-.bloco--marrom .numeros__item--reservado .numeros__nota { color: var(--text-on-dark-soft); }
-/* Faltava `padding-block`: só o `padding-inline` deixava a caixa colada em
-   cima e embaixo do "?", sem o respiro que a moldura tracejada pede. */
-.bloco--marrom .numeros__valor--vazio { opacity: .5;
-  border: var(--traco) dashed var(--hairline-dark); border-radius: var(--raio-sm);
-  display: inline-block; padding: var(--s-8) var(--s-24); }
 
 /* --- entrega: lista × maquetes ------------------------------------------- */
 /* A divisão "na entrada" × "todos os meses" substitui o numeral 01–05 da v1:
@@ -698,26 +689,46 @@ p + p { margin-top: var(--s-16); }
 .maquete__digitando span:nth-child(3) { animation-delay: .4s; }
 @keyframes pulsa { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 
-/* --- prova: lugares reservados ------------------------------------------- */
-/* 🔴 Estado de APROVAÇÃO DE LAYOUT. Não publicar assim: preencher os 3
-   depoimentos ou devolver o `hidden` à seção `#prova`. */
-.prova-slots { display: grid; gap: var(--s-24); margin-top: var(--s-48); }
-@media (min-width: 48rem) { .prova-slots { grid-template-columns: repeat(3, 1fr); } }
-.slot { border: var(--traco) dashed color-mix(in srgb, var(--marrom) 34%, transparent);
-  border-radius: var(--raio-lg); padding: var(--s-32) var(--s-24); text-align: center; }
-/* A seção PROVA virou bloco marrom: tracejado e rótulo precisam do par claro. */
-.bloco--marrom .slot { border-color: var(--hairline-dark); }
-.bloco--marrom .slot__aviso { color: var(--dourado-claro); }
-.bloco--marrom .slot__nota { color: var(--text-on-dark-soft); }
-.slot__aviso { font-family: var(--display); font-size: var(--fs-lg); color: var(--dourado-texto); }
-/* 72%, nao 64%: medido em 2026-07-30, 64% da 4,05 sobre creme e reprova AA em
-   texto pequeno. 72% = 5,04. O mesmo vale para .numeros__nota. */
-.slot__nota { font-size: var(--fs-sm); margin-top: var(--s-8);
-  color: color-mix(in srgb, var(--marrom) 72%, transparent); }
-/* Maiúscula só visual (`::first-letter`), sem tocar o texto-fonte: a regra
-   desta rodada proíbe mudar copy, e pontuação final entraria como caractere
-   novo — por isso fica de fora daqui. */
-.slot__nota::first-letter { text-transform: uppercase; }
+/* --- prova: depoimentos --------------------------------------------------
+   Substituiu os `.slot` de reserva (layout de aprovação) pelos 3 depoimentos
+   reais em 2026-08-11. Cartão sobre o marrom cheio da seção: mesmo par
+   `--cartao-marrom` / `--hairline-dark` do `.etapa`, para não introduzir uma
+   terceira superfície de cartão na página.
+   HORIZONTAL, um por linha (2026-08-11, pedido do Ricardo): a grade de 3
+   colunas fazia cada depoimento virar uma coluna estreita e alta, ruim para
+   texto corrido longo. Agora é uma lista de largura cheia — cada cartão
+   ocupa 100% do `.envelope` (mesma margem da seção) — com o crédito como
+   coluna fixa ao lado da citação a partir do breakpoint de tablet. */
+.prova-slots { display: grid; gap: var(--s-24); width: 100%; margin-top: var(--s-48); }
+.depoimento {
+  display: grid; gap: var(--s-16); width: 100%;
+  background: var(--cartao-marrom); border: var(--traco) solid var(--hairline-dark);
+  border-radius: var(--raio-lg); padding: var(--s-32);
+}
+.depoimento blockquote { display: grid; gap: var(--s-16); margin: 0; }
+.depoimento blockquote p { font-size: var(--fs-sm); color: var(--text-on-dark); }
+.depoimento blockquote p:first-of-type::before { content: "“"; color: var(--dourado-claro); }
+.depoimento blockquote p:last-of-type::after { content: "”"; color: var(--dourado-claro); }
+.depoimento figcaption {
+  padding-top: var(--s-16); border-top: var(--traco) solid var(--hairline-dark);
+  font-weight: var(--fw-bold); letter-spacing: .01em; color: var(--dourado-claro);
+}
+/* A partir daqui cabe crédito + citação lado a lado sem espremer nenhum dos
+   dois: coluna do crédito com largura fixa, citação preenche o resto. */
+@media (min-width: 48rem) {
+  .depoimento {
+    grid-template-columns: 12rem 1fr; grid-template-areas: "credito citacao"; align-items: start;
+  }
+  .depoimento blockquote { grid-area: citacao; }
+  .depoimento figcaption {
+    grid-area: credito; padding-top: 0; border-top: none;
+    border-right: var(--traco) solid var(--hairline-dark); padding-right: var(--s-24);
+  }
+}
+
+/* Botão de prova social: sempre centralizado, independente de quantos
+   depoimentos existirem acima — não é aliado a nenhuma coluna da grade. */
+.prova-cta { margin-top: var(--s-48); text-align: center; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
